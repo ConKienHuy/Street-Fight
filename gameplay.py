@@ -125,7 +125,7 @@ def run(client_socket, player_name):
                pygame.K_F4, pygame.K_F5, pygame.K_F6, pygame.K_F7, pygame.K_F8, pygame.K_F9, pygame.K_F10, pygame.K_F11, pygame.K_F12,
                pygame.K_F13, pygame.K_F14, pygame.K_F15, pygame.K_NUMLOCK, pygame.K_CAPSLOCK, pygame.K_SCROLLOCK, pygame.K_RSHIFT, pygame.K_LSHIFT,
                pygame.K_RCTRL, pygame.K_LCTRL, pygame.K_RALT, pygame.K_LALT, pygame.K_RMETA, pygame.K_LMETA, pygame.K_LSUPER, pygame.K_RSUPER,
-               pygame.K_MODE, pygame.K_HELP, pygame.K_PRINT, pygame.K_SYSREQ, pygame.K_BREAK, pygame.K_MENU, pygame.K_POWER, pygame.K_AC_BACK]
+               pygame.K_MODE, pygame.K_HELP, pygame.K_PRINT, pygame.K_SYSREQ, pygame.K_BREAK, pygame.K_MENU, pygame.K_POWER, pygame.K_AC_BACK, pygame.K_UNDERSCORE]
     return key in special
 
   #Tạo 2 fighter với tọa độ x y
@@ -158,7 +158,7 @@ def run(client_socket, player_name):
 
     #update countdown
     if intro_count <= 0:
-      
+      '''
       if round_over == False and chat_flag == False:
         key = pygame.key.get_pressed()
         if (key[pygame.K_a]): client_socket.send(f"__{player}A".encode("utf-8"))
@@ -166,6 +166,7 @@ def run(client_socket, player_name):
         if (key[pygame.K_w]): client_socket.send(f"__{player}W".encode("utf-8"))
         if (key[pygame.K_r]): client_socket.send(f"__{player}R".encode("utf-8"))
         if (key[pygame.K_t]): client_socket.send(f"__{player}T".encode("utf-8"))
+        '''
       
     else:
       #display count timer
@@ -275,6 +276,12 @@ def run(client_socket, player_name):
         elif (not is_special_key(event.key)):
           input_color = (255, 255, 255)
           chat_input.append(event.unicode)
+      elif round_over == False:
+        if event.key == pygame.K_a: client_socket.send(f"__{player}A".encode("utf-8"))
+        if event.key == pygame.K_d: client_socket.send(f"__{player}D".encode("utf-8"))
+        if event.key == pygame.K_w: client_socket.send(f"__{player}W".encode("utf-8"))
+        if event.key == pygame.K_r: client_socket.send(f"__{player}R".encode("utf-8"))
+        if event.key == pygame.K_t: client_socket.send(f"__{player}T".encode("utf-8"))
 
     #update display
     pygame.display.update()

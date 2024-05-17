@@ -77,7 +77,7 @@ def play():
 
 def connect_to_server(player_name):
     # Kết nối đến server
-    HOST = socket.gethostbyname(socket.gethostname())
+    HOST = "192.168.43.218"
     PORT = 5555
 
     try:

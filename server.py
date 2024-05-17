@@ -1,6 +1,7 @@
 import socket, threading, gameplay, pygame
 
-HOST = socket.gethostbyname(socket.gethostname())
+#HOST = socket.gethostbyname(socket.gethostname())
+HOST = "192.168.43.218"
 PORT = 5555
 MAX_CLIENTS = 2
 
