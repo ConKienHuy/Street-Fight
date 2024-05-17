@@ -19,7 +19,7 @@ Street Fight is a fighting game between 2 players, each of them have one single 
 
 # Game footage
 <p align="center">
-    <img src="https://lh3.googleusercontent.com/pw/AP1GczOoMlSWQ2szX3jGrWT8ptOj6PAB88xYWELYc8g5Q585DjPHR5Vz9hCRZWOMiJjxwnPbcRgQXl00M0ZE6w25B8Jk7-5pBhw9pn8_mFVuAXQX4Zbck0Uf3iDb2MT80hzyftOl6DNIKSdQ8aW-DPB9N69r=w1240-h698-s-no-gm?authuser=0" alt="main_menu">
+    <img src="https://lh3.googleusercontent.com/pw/AP1GczNEeiJcJjI8UjTsMSwpVKJ6IV0flLyj9hKaxGVbZpUNnvX_8X2EOc5CaWeKnn7Wi2O6wJdS_1e0AZY4oUTn0HJxkW0nqtZ7HUOFSjy7Jq041xHi_lia6Qnj_kbkBckY4lNLdFh5SEeOEM6LHImq2JSs=w1545-h869-s-no-gm" alt="main_menu">
 </p>
 <p align="center">
     <img src="https://lh3.googleusercontent.com/pw/AP1GczNyFq9Mz4E1sTKRkAXPblIYzyGlXrOA6J6ZkyHe_gAQpPEowfO4Ump3wgC4MKKbkeg0ChxgXB81QvwoHkrqHfF_HFkmnq2AR_iMAcc0aWDw1czuGANncPOqwbj6Z-OYi1ZqnBbms5ytjfuDurfKj0e3=w1300-h731-s-no-gm" alt="chat">
