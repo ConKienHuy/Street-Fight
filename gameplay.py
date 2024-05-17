@@ -1,25 +1,26 @@
+import traceback
+
 import pygame
 from pygame import mixer
+
 from fighter import Fighter
 import threading
 from button import *
 
 player = 0
-
-def receive(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog):
+def receive(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog, ):
   global player
   while True:
     try:
       key = client_socket.recv(1024).decode("utf-8")
-      
       if (key.startswith("__P") and player == 0):
         player = key[3]
       elif (key.startswith("__1")):
         fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over, key)
-        if (key not in ["__1A", "__1D"]): fighter_1.update()
+        if key not in ["__1A", "__1D"]: fighter_1.update()
       elif (key.startswith("__2")):
         fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over, key)
-        if (key not in ["__2A", "__2D"]): fighter_2.update()
+        if key not in ["__2A", "__2D"]: fighter_2.update()
       else:
         chat_dialog.append(key)
     except:
@@ -38,7 +39,7 @@ def run(client_socket, player_name):
   SCREEN_HEIGHT = systemInfo.current_h
 
   screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-  pygame.display.set_caption(f"Street Fight")
+  pygame.display.set_caption(f"Brawler {player}")
 
   #set framerate
   clock = pygame.time.Clock()
@@ -125,18 +126,19 @@ def run(client_socket, player_name):
                pygame.K_F4, pygame.K_F5, pygame.K_F6, pygame.K_F7, pygame.K_F8, pygame.K_F9, pygame.K_F10, pygame.K_F11, pygame.K_F12,
                pygame.K_F13, pygame.K_F14, pygame.K_F15, pygame.K_NUMLOCK, pygame.K_CAPSLOCK, pygame.K_SCROLLOCK, pygame.K_RSHIFT, pygame.K_LSHIFT,
                pygame.K_RCTRL, pygame.K_LCTRL, pygame.K_RALT, pygame.K_LALT, pygame.K_RMETA, pygame.K_LMETA, pygame.K_LSUPER, pygame.K_RSUPER,
-               pygame.K_MODE, pygame.K_HELP, pygame.K_PRINT, pygame.K_SYSREQ, pygame.K_BREAK, pygame.K_MENU, pygame.K_POWER, pygame.K_AC_BACK, pygame.K_UNDERSCORE]
+               pygame.K_MODE, pygame.K_HELP, pygame.K_PRINT, pygame.K_SYSREQ, pygame.K_BREAK, pygame.K_MENU, pygame.K_POWER, pygame.K_AC_BACK]
     return key in special
 
   #Tạo 2 fighter với tọa độ x y
-  fighter_1 = Fighter(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 13 // 24, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
-  fighter_2 = Fighter(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 13 // 24, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
+  fighter_1 = Fighter(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 13 // 22, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
+  fighter_2 = Fighter(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 13 // 22, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
   fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over)
   fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over)
   
-  receive_thread = threading.Thread(target=receive, args=(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog,))
+  receive_thread = threading.Thread(target=receive, args=(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog))
   receive_thread.start()
 
+  global update_allowed2
   #game loop
   isRun = True
   while isRun:
@@ -158,7 +160,6 @@ def run(client_socket, player_name):
 
     #update countdown
     if intro_count <= 0:
-      '''
       if round_over == False and chat_flag == False:
         key = pygame.key.get_pressed()
         if (key[pygame.K_a]): client_socket.send(f"__{player}A".encode("utf-8"))
@@ -166,8 +167,7 @@ def run(client_socket, player_name):
         if (key[pygame.K_w]): client_socket.send(f"__{player}W".encode("utf-8"))
         if (key[pygame.K_r]): client_socket.send(f"__{player}R".encode("utf-8"))
         if (key[pygame.K_t]): client_socket.send(f"__{player}T".encode("utf-8"))
-        '''
-      
+
     else:
       #display count timer
       draw_text(str(intro_count), count_font, RED, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3)
@@ -184,6 +184,9 @@ def run(client_socket, player_name):
     fighter_1.draw(screen)
     fighter_2.draw(screen)
 
+    """
+    ---------------------------------------------------------------------------------
+    """
     #check for player defeat
     if round_over == False:
       if fighter_1.alive == False:
@@ -200,8 +203,8 @@ def run(client_socket, player_name):
       if pygame.time.get_ticks() - round_over_time > ROUND_OVER_COOLDOWN:
         round_over = False
         intro_count = 3
-        fighter_1.reset(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 73 // 108, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
-        fighter_2.reset(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 73 // 108, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
+        fighter_1.reset(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 13 // 22, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
+        fighter_2.reset(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 13 // 22, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
         receive_thread = threading.Thread(target=receive, args=(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over,))
 
     #draw chat input
@@ -276,12 +279,6 @@ def run(client_socket, player_name):
         elif (not is_special_key(event.key)):
           input_color = (255, 255, 255)
           chat_input.append(event.unicode)
-      elif round_over == False:
-        if event.key == pygame.K_a: client_socket.send(f"__{player}A".encode("utf-8"))
-        if event.key == pygame.K_d: client_socket.send(f"__{player}D".encode("utf-8"))
-        if event.key == pygame.K_w: client_socket.send(f"__{player}W".encode("utf-8"))
-        if event.key == pygame.K_r: client_socket.send(f"__{player}R".encode("utf-8"))
-        if event.key == pygame.K_t: client_socket.send(f"__{player}T".encode("utf-8"))
 
     #update display
     pygame.display.update()

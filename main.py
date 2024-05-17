@@ -10,7 +10,7 @@ systemInfo = pygame.display.Info()
 SCREEN_WIDTH = systemInfo.current_w
 SCREEN_HEIGHT = systemInfo.current_h
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
-pygame.display.set_caption(f"Street Fight")
+pygame.display.set_caption("Street Fight")
 BG = pygame.image.load("assets/bg.jpg")
 
 def get_font(size):
@@ -18,13 +18,6 @@ def get_font(size):
 
 name_input = []  # Khởi tạo name_input như một list
 ready_count = 0
-
-def start_game1():
-    global systemInfo
-    screen = pygame.display.set_mode((systemInfo.current_w, systemInfo.current_h))
-    pygame.display.set_caption("Stress Fight")
-    bg_image = pygame.image.load("assets/bggame.jpg")
-    screen.blit(bg_image, (0,0))
 
 def start_game(client_socket, player_name):
     gameplay.run(client_socket, player_name)
@@ -55,6 +48,7 @@ def play():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
                     main_menu()
@@ -70,6 +64,8 @@ def play():
                     print("Player name:", ''.join(name_input))
                     # Gửi ready signal đến server khi nhấn Enter
                     connect_to_server(''.join(name_input))
+                elif event.key == pygame.K_ESCAPE:
+                    main_menu()
                 else:
                     name_input.append(event.unicode)
 
@@ -77,7 +73,7 @@ def play():
 
 def connect_to_server(player_name):
     # Kết nối đến server
-    HOST = "192.168.43.218"
+    HOST = "192.168.1.225"
     PORT = 5555
 
     try:
@@ -120,6 +116,9 @@ def main_menu():
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    play()
 
         pygame.display.update()
 
