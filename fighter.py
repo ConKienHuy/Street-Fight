@@ -143,6 +143,7 @@ class Fighter():
     self.rect.x += dx
     self.rect.y += dy
 
+
   #handle animation updates
   def update(self):
     #check what action the player is performing

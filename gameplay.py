@@ -1,24 +1,25 @@
-import traceback
-
 import pygame
 from pygame import mixer
-
 from fighter import Fighter
 import threading
 from button import *
 
 player = 0
-def receive(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog, ):
+
+def receive(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog):
   global player
   while True:
     try:
       key = client_socket.recv(1024).decode("utf-8")
+      
       if (key.startswith("__P") and player == 0):
         player = key[3]
       elif (key.startswith("__1")):
         fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over, key)
+        if (key not in ["__1A", "__1D"]): fighter_1.update()
       elif (key.startswith("__2")):
         fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over, key)
+        if (key not in ["__2A", "__2D"]): fighter_2.update()
       else:
         chat_dialog.append(key)
     except:
@@ -33,11 +34,11 @@ def run(client_socket, player_name):
 
   #create game window
   systemInfo = pygame.display.Info()
-  SCREEN_WIDTH = 1280
-  SCREEN_HEIGHT = 720
+  SCREEN_WIDTH = systemInfo.current_w
+  SCREEN_HEIGHT = systemInfo.current_h
 
   screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-  pygame.display.set_caption(f"Brawler {player}")
+  pygame.display.set_caption(f"Street Fight")
 
   #set framerate
   clock = pygame.time.Clock()
@@ -66,9 +67,9 @@ def run(client_socket, player_name):
   WIZARD_DATA = [WIZARD_SIZE, WIZARD_SCALE, WIZARD_OFFSET]
 
   #load music and sounds
-  # pygame.mixer.music.load("assets/audio/music.mp3")
-  # pygame.mixer.music.set_volume(9.5)
-  # pygame.mixer.music.play(-1, 0.0, 5000)
+  pygame.mixer.music.load("assets/audio/music.mp3")
+  pygame.mixer.music.set_volume(9.5)
+  pygame.mixer.music.play(-1, 0.0, 5000)
   sword_fx = pygame.mixer.Sound("assets/audio/sword.wav")
   sword_fx.set_volume(0.5)
   magic_fx = pygame.mixer.Sound("assets/audio/magic.wav")
@@ -128,15 +129,14 @@ def run(client_socket, player_name):
     return key in special
 
   #Tạo 2 fighter với tọa độ x y
-  fighter_1 = Fighter(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 13 // 22, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
-  fighter_2 = Fighter(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 13 // 22, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
-  # fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over)
-  # fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over)
+  fighter_1 = Fighter(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 13 // 24, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
+  fighter_2 = Fighter(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 13 // 24, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
+  fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over)
+  fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over)
   
-  receive_thread = threading.Thread(target=receive, args=(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog))
+  receive_thread = threading.Thread(target=receive, args=(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over, chat_dialog,))
   receive_thread.start()
 
-  global update_allowed2
   #game loop
   isRun = True
   while isRun:
@@ -153,19 +153,20 @@ def run(client_socket, player_name):
     draw_text("P2: " + str(score[1]), score_font, RED, SCREEN_WIDTH - 100, 60)
     
     #move fighters
-    # fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over)
-    # fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over)
+    fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2, round_over)
+    fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, round_over)
 
     #update countdown
     if intro_count <= 0:
+      
       if round_over == False and chat_flag == False:
         key = pygame.key.get_pressed()
         if (key[pygame.K_a]): client_socket.send(f"__{player}A".encode("utf-8"))
         if (key[pygame.K_d]): client_socket.send(f"__{player}D".encode("utf-8"))
-        #if (key[pygame.K_w]): client_socket.send(f"__{player}W".encode("utf-8"))
+        if (key[pygame.K_w]): client_socket.send(f"__{player}W".encode("utf-8"))
         if (key[pygame.K_r]): client_socket.send(f"__{player}R".encode("utf-8"))
         if (key[pygame.K_t]): client_socket.send(f"__{player}T".encode("utf-8"))
-
+      
     else:
       #display count timer
       draw_text(str(intro_count), count_font, RED, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3)
@@ -182,9 +183,6 @@ def run(client_socket, player_name):
     fighter_1.draw(screen)
     fighter_2.draw(screen)
 
-    """
-    ---------------------------------------------------------------------------------
-    """
     #check for player defeat
     if round_over == False:
       if fighter_1.alive == False:
@@ -201,8 +199,8 @@ def run(client_socket, player_name):
       if pygame.time.get_ticks() - round_over_time > ROUND_OVER_COOLDOWN:
         round_over = False
         intro_count = 3
-        fighter_1.reset(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 13 // 22, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
-        fighter_2.reset(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 13 // 22, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
+        fighter_1.reset(1, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT * 73 // 108, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS, sword_fx)
+        fighter_2.reset(2, SCREEN_WIDTH // 2 + 200, SCREEN_HEIGHT * 73 // 108, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS, magic_fx)
         receive_thread = threading.Thread(target=receive, args=(client_socket, SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, fighter_2, round_over,))
 
     #draw chat input
